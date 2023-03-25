@@ -115,8 +115,8 @@ create trigger cant_delete_borrower_trigger
 	referencing old as o
 	for each row
 	when ((select count(*)
-		from Checked_out
-		where borrower_id = o.borrower_id)
-	> 0)
+			from Checked_out
+			where borrower_id = o.borrower_id)
+		> 0)
 		signal sqlstate '70001'
 		set message_text = 'CANT_DELETE_BORROWER_WITH_BOOK(S)_CHECKED_OUT';
