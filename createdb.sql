@@ -5,11 +5,11 @@ create variable fine_daily_rate_in_cents integer default 5;
 
 create table Category(
 	category_name char(10) not null,
-	checkout_period integer not null
-		check (checkout_period >= 0),
-	max_books_out integer not null
-		check (max_books_out >= 0),
-	primary key (category_name)
+	checkout_period integer not null,
+	max_books_out integer not null,
+	primary key (category_name),
+	constraint checkout_period_nonnegative check (checkout_period >= 0),
+	constraint max_books_out_nonnegative check (max_books_out >= 0) 
 );
 
 create table Borrower(
