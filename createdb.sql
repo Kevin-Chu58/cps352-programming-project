@@ -8,8 +8,8 @@ create table Category(
 	checkout_period integer not null,
 	max_books_out integer not null,
 	primary key (category_name),
-	constraint checkout_period_nonnegative check (checkout_period >= 0),
-	constraint max_books_out_nonnegative check (max_books_out >= 0) 
+	constraint CHK_checkout_period check (checkout_period >= 0),
+	constraint CHK_max_books_out check (max_books_out >= 0) 
 );
 
 create table Borrower(
