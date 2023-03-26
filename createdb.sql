@@ -18,7 +18,7 @@ create table Borrower(
 	first_name char(20) not null,
 	category_name char(10) not null,
 	primary key (borrower_id),
-	foreign key (category_name) references Category(category_name)
+	constraint FK_category_name foreign key (category_name) references Category(category_name)
 );
 
 create table Borrower_phone(
@@ -33,7 +33,7 @@ create table Book_info(
 	title char(50) not null,
 	format char(2) not null,
 	primary key (call_number),
-	constraint CHK_format check (format in ('HC', 'C', 'SC', 'D', 'MF', 'PE'))
+	constraint CHK_format check (format in ('HC', 'C SC', 'D', 'MF', 'PE'))
 );
 
 -- The code supplied below for bar_code will cause it to be generated
@@ -119,7 +119,25 @@ create trigger cant_delete_borrower_trigger
 			where borrower_id = o.borrower_id)
 		> 0)
 		signal sqlstate '70001'
-		set message_text = 'CANT_DELETE_BORROWER_WITH_BOOK(S)_CHECKED_OUT';
+		set message_text = 'CANT_DELETE_BORROWER_WITH_BOOK_CHECKED_OUT';
+
+-- This trigger will prevent an attempt to checkout too many books
+
+create trigger cant_checkout_book_trigger
+	before insert on Checked_out
+	referencing new as n
+	for each row
+	when ((select count(*)
+			from Checked_out
+			where borrower_id = n.borrower_id)
+		= (select max_books_out
+			from Borrower
+			join Category
+			on Borrower.category_name = Category.category_name
+			where borrower_id = n.borrower_id))
+		signal sqlstate '70002'
+		set message_text = 'REACHED_MAX_BOOK_CHECKED_OUT_LIMIT';
+
 
 -- This trigger will assess a fine on an overdue book
 
@@ -133,3 +151,4 @@ create trigger assess_fine_trigger
 			from o
 			join Book_info
 			on o.call_number = call_number;
+      
