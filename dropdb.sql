@@ -4,6 +4,7 @@ drop trigger last_book_trigger;
 drop trigger cant_renew_overdue_trigger;
 drop trigger cant_delete_borrower_trigger;
 drop trigger cant_checkout_book_trigger;
+drop trigger assess_fine_trigger;
 
 -- Code to drop other triggers needs to be added here.
 

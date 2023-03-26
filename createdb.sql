@@ -33,7 +33,7 @@ create table Book_info(
 	title char(50) not null,
 	format char(2) not null,
 	primary key (call_number),
-	constraint CHK_format check (format in ('HC', 'C SC', 'D', 'MF', 'PE'))
+	constraint CHK_format check (format in ('HC', 'SC', 'CD', 'MF', 'PE'))
 );
 
 -- The code supplied below for bar_code will cause it to be generated
@@ -147,8 +147,11 @@ create trigger assess_fine_trigger
 	for each row
 	when (o.date_due < today)
 		insert into Fine
-			select o.borrower_id, title, o.date_due, today, ((days(today) - days(o.date_due)) * fine_daily_rate_in_cents) / 100
-			from o
-			join Book_info
-			on o.call_number = call_number;
+		values(o.borrower_id,
+			(select title
+				from Book_info
+				where call_number = o.call_number),
+			o.date_due,
+			today,
+			((days(today) - days(o.date_due)) * fine_daily_rate_in_cents) / 100.0);
       
