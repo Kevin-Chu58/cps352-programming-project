@@ -1,6 +1,6 @@
 connect to project; 
 
-create variable today date;
+create variable today date default '03-26-2023';
 create variable fine_daily_rate_in_cents integer default 5;
 
 create table Category(
@@ -147,8 +147,19 @@ create trigger assess_fine_trigger
 	for each row
 	when (o.date_due < today)
 		insert into Fine
-			select o.borrower_id, title, o.date_due, today, ((days(today) - days(o.date_due)) * fine_daily_rate_in_cents) / 100
-			from o
-			join Book_info
-			on o.call_number = call_number;
+		values(o.borrower_id,
+			(select title
+				from Book_info
+				where call_number = o.call_number),
+			o.date_due,
+			today,
+			((days(today) - days(o.date_due)) * fine_daily_rate_in_cents) / 100.0);
+
+-- test
+insert into Category values('rookie', 1, 1);
+insert into Borrower values('11111', 'chu', 'kevin', 'rookie');
+insert into Book_info values('AA.00', 'demo', 'HC');
+insert into Book values('AA.00', 1, default);
+insert into Checked_out values('AA.00', 1, '11111', '3/25/2023');
+delete from Checked_out where copy_number = 1;
       
