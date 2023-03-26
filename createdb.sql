@@ -137,3 +137,18 @@ create trigger cant_checkout_book_trigger
 			where borrower_id = n.borrower_id))
 		signal sqlstate '70002'
 		set message_text = 'REACHED_MAX_BOOK_CHECKED_OUT_LIMIT';
+
+
+-- This trigger will assess a fine on an overdue book
+
+create trigger assess_fine_trigger
+	after delete on Checked_out
+	referencing old as o
+	for each row
+	when (o.date_due < today)
+		insert into Fine
+			select o.borrower_id, title, o.date_due, today, ((days(today) - days(o.date_due)) * fine_daily_rate_in_cents) / 100
+			from o
+			join Book_info
+			on o.call_number = call_number;
+      
