@@ -1421,13 +1421,26 @@ stream.println("Overdue Books report");
     private static final int BAD_PASSWORD_SQL_ERROR = -1403;
     private static final String NO_ROW_SQL_STATE = "02000";
     private static final int DUPLICATE_KEY_SQL_ERROR = -803;
+    
+    // SQL states thrown by triggers
+    private static final String CANT_RENEW_OVERDUE = "70000";
+    private static final String CANT_DELETE_BORROWER_WITH_BOOK_CHECKED_OUT = "70001";
+    private static final String REACHED_MAX_BOOK_CHECKED_OUT_LIMIT = "70002";
 
+    // Symbolic names for constraints
+    
     private static final String BOOK_INFO_VALID_FORMAT_CONSTRAINT = 
-        "~~~ YOU NEED TO FILL THIS IN ~~~";
+        "CHK_FORMAT";
     private static final String BOOK_KEYWORD_VALID_KEYWORD_CONSTRAINT = 
-        "~~~ YOU NEED TO FILL THIS IN ~~~";
+        "CHK_KEYWORD";
     private static final String BORROWER_CATEGORY_FOREIGN_CONSTRAINT =
-        "~~~ YOU NEED TO FILL THIS IN ~~~";
+        "FK_CATEGORY_NAME";
+    
+    // unimplemented
+    private static final String CATEGORY_CHECKOUT_PERIOD_CONSTRAINT = 
+        "CHK_CHECKOUT_PERIOD";
+    private static final String CATEGORY_MAX_BOOKS_OUT_CONSTRAINT = 
+        "CHK_MAX_BOOKS_OUT";
    
     private static final String BOOK_AUTHOR_TABLE_NAME = "BOOK_AUTHOR";
     
