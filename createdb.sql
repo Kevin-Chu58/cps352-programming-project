@@ -122,9 +122,6 @@ create trigger cant_delete_borrower_trigger
 		set message_text = 'CANT_DELETE_BORROWER_WITH_BOOK(S)_CHECKED_OUT';
 
 -- This trigger will assess a fine on an overdue book
--- The insert part is not going to work as it is. The title probably needs to be selected
--- from Book_info, and I do not know how to insert from a select statement when all the
--- values will not be selected fromt that table.
 
 create trigger assess_fine_trigger
 	after delete on Checked_out
@@ -132,4 +129,7 @@ create trigger assess_fine_trigger
 	for each row
 	when (o.date_due < today)
 		insert into Fine
-			values (o.borrower_id, title, o.date_due, today, (days(today) - days(o.date_due)) / 100);
+			select o.borrower_id, title, o.date_due, today, ((days(today) - days(o.date_due)) * fine_daily_rate_in_cents) / 100
+			from o
+			join Book_info
+			on o.call_number = call_number;
