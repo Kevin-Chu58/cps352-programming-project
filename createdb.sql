@@ -1,6 +1,6 @@
 connect to project; 
 
-create variable today date default '03-26-2023';
+create variable today date;
 create variable fine_daily_rate_in_cents integer default 5;
 
 create table Category(
