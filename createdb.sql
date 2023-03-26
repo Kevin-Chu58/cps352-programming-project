@@ -33,7 +33,7 @@ create table Book_info(
 	title char(50) not null,
 	format char(2) not null,
 	primary key (call_number),
-	constraint CHK_format check (format in ('HC', 'C SC', 'D', 'MF', 'PE'))
+	constraint CHK_format check (format in ('HC', 'SC', 'CD', 'MF', 'PE'))
 );
 
 -- The code supplied below for bar_code will cause it to be generated
