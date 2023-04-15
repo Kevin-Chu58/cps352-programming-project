@@ -986,7 +986,14 @@ public class Database
         }
         catch(SQLException e) {
             rollback();
-            // TODO
+            
+            if (e.getErrorCode() == DUPLICATE_KEY_SQL_ERROR)
+                // duplicate key error only occurs on Borrower_phone insertion
+                throw new ErrorMessage("Duplicate phone for this borrower");
+            else if (e.getMessage().indexOf(BORROWER_CATEGORY_FOREIGN_CONSTRAINT) >= 0)
+                throw new ErrorMessage("Invalid category");
+            else
+                throw new ErrorMessage("Unexpected SQL error " + e.getMessage());
         }
     }
 
