@@ -924,7 +924,10 @@ public class Database
             values[3] = originalPhones;
         }
         catch(SQLException e) {
-            // TODO
+            if (e.getSQLState().equals(NO_ROW_SQL_STATE))
+                throw new ErrorMessage("No such borrower");
+            else
+                throw new ErrorMessage("Unexpected SQL error " + e.getMessage());
         }
         finally {
             rollback();
