@@ -1018,7 +1018,13 @@ public class Database
         catch(SQLException e)
         {
             rollback();
-            throw new ErrorMessage("Unexpected SQL error " + e.getMessage());
+            
+            if (e.getSQLState().equals(NO_ROW_SQL_STATE))
+                throw new ErrorMessage("No such borrower");
+            else if (e.getSQLState().equals(CANT_DELETE_BORROWER_WITH_BOOK_CHECKED_OUT))
+                throw new ErrorMessage("This borrower has book(s) checked out");
+            else
+                throw new ErrorMessage("Unexpected SQL error " + e.getMessage());
         }
     }
 
