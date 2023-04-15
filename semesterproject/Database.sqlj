@@ -138,9 +138,23 @@ public class Database
      */
     public String getBorrowerName(String borrowerID) throws ErrorMessage
     {
-        // STUB
-        if (borrowerID.equals("BAD")) throw new ErrorMessage("Error message test getBorrowerName");
-        return "??? name ???";
+        try {
+            String lastName = null, firstName = null;
+
+            #sql { select last_name, first_name
+                        into :lastName, :firstName
+                        from Borrower
+                        where borrower_id = :borrowerID
+                };
+
+            return firstName + ' ' + lastName;
+        }
+        catch(SQLException e) {
+            throw new ErrorMessage("Unexpected SQL error " + e.getMessage());
+        }
+        finally {
+            rollback();
+        }
     }
 
     /** Check out a book.
@@ -840,7 +854,19 @@ public class Database
         }
         catch (SQLException e) {
             rollback();
-            // TODO
+
+            if (e.getErrorCode() == DUPLICATE_KEY_SQL_ERROR)
+            {
+                // duplicate key error either occur on Borrower or Borrower_phone insertion
+                if (e.getMessage().indexOf(BORROWER_PHONE_TABLE_NAME) >= 0)
+                    throw new ErrorMessage("Duplicate phone for this borrower");
+                else
+                    throw new ErrorMessage("Duplicate borrower id for this borrower");
+            }
+            else if (e.getMessage().indexOf(BORROWER_CATEGORY_FOREIGN_CONSTRAINT) >= 0)
+                throw new ErrorMessage("Invalid category");
+            else
+                throw new ErrorMessage("Unexpected SQL error " + e.getMessage());
         }
     }
 
@@ -1553,6 +1579,7 @@ stream.println("Overdue Books report");
         "CHK_MAX_BOOKS_OUT";
    
     private static final String BOOK_AUTHOR_TABLE_NAME = "BOOK_AUTHOR";
+    private static final String BORROWER_PHONE_TABLE_NAME = "BORROWER_PHONE";
     
     private static final String DRIVER_NAME = "com.ibm.db2.jcc.DB2Driver";
     private static final String DATABASE_URL =
