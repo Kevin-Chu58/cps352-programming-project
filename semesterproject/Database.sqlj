@@ -1326,7 +1326,7 @@ stream.println("Book Keywords report");
                 { true, true, true, false, true };
             
             produceReport(stream,
-                "Categories Report",
+                "Borrowers Report",
                 BORROWERS_REPORT_HEADINGS,
                 BORROWERS_REPORT_COLUMN_WIDTHS,
                 BORROWERS_REPORT_REPEAT_COLUMNS,
