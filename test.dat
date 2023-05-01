@@ -1,42 +1,155 @@
 ! Example of a testing file.   THESE ARE FAR FROM SUFFICIENT TESTS!  
 ! STUDENTS: BE SURE THE FILE YOU TURN IN TESTS EVERYTHING
-! STUDENTS: PUT YOUR NAME(S) HERE
+! STUDENTS: Micah Conway, Kevin Chu
 !
 ! Delete pre-existing data
 #
-! Examples of add tests
-! Two copies of the same book, one category, one borrower
+! >> TEST: add book
+! LEGITIMATE - add two books (3 copies and 1 copy each)
 AK AA.00 "LEGITIMATE BOOK" { AARDVARK ZEBRA } HC { ORIGINAL WORDS }
 AK AA.00
-AC PEON 14 100
-AR 1234 AARDVARK ANTHONY { 123-4567 X1234 } PEON
-! Example of an illegal add - a book with spaces in a keyword
-AK AB.00 "SPACES IN KEYWORD" { } HC { "SPACE IN KW" }
-! Examples of checkout, renewal requests
-C 1234 AA.00 1
-C 1234 AA.00 2
+AK AA.00
+AK BB.00 "ANOTHER LEGITIMATE BOOK" { DUMMY DATA } HC { DUMMY }
+! ILLEGAL - wrong format
+AK AA.01 "ILLEGAL BOOK" { AARDVARK ZEBRA } XX { ORIGINAL WORDS }
+! ILLEGAL - duplicate author
+AK AA.01 "ILLEGAL BOOK" { AARDVARK AARDVARK } HC { ORIGINAL WORDS }
+! ILLEGAL - keyword with spaces
+AK AA.01 "ILLEGAL BOOK" { AARDVARK ZEBRA } HC { "ORIGINAL WORDS" }
+! ILLEGAL - duplicate keyword
+AK AA.01 "ILLEGAL BOOK" { AARDVARK ZEBRA } HC { ORIGINAL ORIGINAL }
+! >> TEST: edit book
+! LEGITIMATE - edit a book
+EK AA.00 "A LEGITIMATE BOOK" { AARDVARK TRUMP } HC { ORIGINAL DUMMY PRESIDENT }
+! ILLEGAL - no such book
+EK AA.01 "LEGITIMATE BOOK" { AARDVARK ZEBRA } HC { ORIGINAL WORDS }
+! ILLEGAL - wrong format
+EK AA.00 "LEGITIMATE BOOK" { AARDVARK ZEBRA } XX { ORIGINAL WORDS }
+! ILLEGAL - duplicate author
+EK AA.00 "LEGITIMATE BOOK" { AARDVARK AARDVARK } HC { ORIGINAL WORDS }
+! ILLEGAL - keyword with spaces
+EK AA.00 "LEGITIMATE BOOK" { AARDVARK ZEBRA } HC { "ORIGINAL WORDS" }
+! ILLEGAL - duplicate keyword
+EK AA.00 "LEGITIMATE BOOK" { AARDVARK ZEBRA } HC { ORIGINAL ORIGINAL }
+! >> TEST: add category
+! LEGITIMATE - add three categories
+AC STUDENT 10 3
+AC GUEST 1 1
+AC GOD 3650 1000
+! ILLEGAL - duplicate name
+AC GOD 3650 1000
+! >> TEST: edit category
+! LEGITIMATE - edit a category
+EC GOD 365 100
+! ILLEGAL - no such category
+EC FACULTY 100 100
+! >> TEST: add borrower
+! LEGITIMATE - add two borrowers
+AR 11111 CHU KEVIN { 978-429-0000 X1234 } STUDENT
+AR 22222 SOMEONE UNKNOWN { 978-429-1111 X2222 X3333 } GUEST
+! ILLEGAL - duplicate ID
+AR 11111 ANOTHER UNKNOWN { } GUEST
+! ILLEGAL - duplicate phone
+AR 12345 ANOTHER UNKNOWN { 12345 12345 } GUEST
+! ILLEGAL - undefined category
+AR 12345 ANOTHER UNKNOWN { 12345 } THIEF
+! >> TEST: edit borrower
+! LEGITIMATE - edit a borrower
+ER 11111 CHU KEVIN { 978-429-0000 X5678 } STUDENT
+! ILLEGAL - no such borrower
+ER 12345 CHU KEVIN { 978-429-0000 X1234 } STUDENT
+! ILLEGAL - duplicate phone
+ER 11111 CHU KEVIN { 978-429-0000 978-429-0000 } STUDENT
+! ILLEGAL - undefined category
+ER 11111 CHU KEVIN { 978-429-0000 X1234 } ADMIN
+! >> TEST: checkout
+! LEGITIMATE - checkout a book to a borrower
+C 22222 AA.00 1
+! ILLEGAL - no such borrower
+C 12345 AA.00 2
+! ILLEGAL - no such book
+C 11111 ZZ.00 1
+! ILLEGAL - book already out to someone else
+C 11111 AA.00 1
+! ILLEGAL - too many books for borrower
+C 22222 AA.00 2
+! >> TEST: returns
+! LEGITMATE - return a checked-out book
+R AA.00 1
+! ILLEGAL - book is not out
+R AA.00 1
+! LEGITIMATE - overdue is fined, borrower 22222 is fined $0.05
+C 22222 AA.00 1
++ 2
+R AA.00 1
+! >> TEST: renewals
+! LEGITIMATE - renew a checked-out book
+C 22222 AA.00 1
++ 1
 W AA.00 1
-! Example of date modification and returning a book late
-+ 30
-R AA.00 2
-! Examples of fine tests. 
-G 1234
-! Change date on next line to be 14 days after date test is run
-F 1234 "LEGITIMATE BOOK" 2023-01-01
-G 1234
-! Examples of edit tests
-EK AA.00 "EDITED LEGITIMATE BOOK" { NEWAUTHOR AARDVARK } SC { WORDS EDITED }
-EC PEON 5 2
-ER 1234 ZEBRA ZELDA { X1234 987-6543 } PEON
-! Examples of reports
+! ILLEGAL - book is not out
+W AA.00 2
+! ILLEGAL - overdue not allowed
++ 2
+W AA.00 1
+! >> TEST: book report
 PB
+! >> TEST: book copies report
 Pb
+! >> TEST: book keywords report
 PK
+! >> TEST: categories report
 PC
+! >> TEST: borrowers report
 PR
+! >> TEST: fines report
 PF
+! >> TEST: overdue books report
 PO
-! Examples of delete tests - copy 1 of book, category and borrower deleted
+! >> TEST: Fines
+! Details recorded correctly
+G 22222
+! LEGITIMATE - pay a fine
+F 22222 "A LEGITIMATE BOOK" 2023-05-02
+! ILLEGAL - no such borrower
+G 12345
+! ILLEGAL - this borrower has no fine
+G 22222
+! >> TEST: delete book
+! ILLEGAL - no such book
+DK ZZ.00 1
+DK AA.00 100
+! LEGITIMATE - delete overdue book, fine on it stays
 DK AA.00 1
-DR 1234
-DC PEON
+G 22222
+! LEGITIMATE - delete a checked-out book that is not overdue
+C 22222 AA.00 2
+DK AA.00 2
+! LEGITMATE - more copies same book - copy 4 and 5
+AK AA.00
+AK AA.00
+DK AA.00 4
+DK AA.00 5
+! LEGITIMATE - last copy of book
+!            - print Book copies report
+DK AA.00 3
+Pb
+! >> TEST: delete borrower
+! ILLEGAL - no such borrower
+DR 12345
+! ILLEGAL - borrower has book checked out
+C 22222 BB.00 1
+DR 22222
+! LEGITIMATE - delete a borrower
+!            - alone with the fine
+R BB.00 1
+G 22222
+DR 22222
+PF
+! >> TEST: delete category
+! ILLEGAL - no such
+DC ADMIN
+! ILLEGAL - borrowers still in the category
+DC STUDENT
+! LEGITIMATE - delete a category
+DC GUEST

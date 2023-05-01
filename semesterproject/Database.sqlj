@@ -186,7 +186,7 @@ public class Database
                     on Category.category_name = Borrower.category_name
                     where borrower_id = :borrowerID
                 };
-
+            
             #sql { insert into Checked_out
                     values(:callNumber, :copyNumber, :borrowerID, today + :checkoutPeriod days)
                 };
@@ -207,8 +207,12 @@ public class Database
         catch(SQLException e)
         {
             rollback();
-            // borrower id is checked when getting the borrower name, so no need to check here
-            if(e.getErrorCode() == INVALID_FOREIGN_KEY_ERROR)
+            // though borrower id is checked when getting the borrower name from UI side,
+            // the test case throw unexpected error
+            // so added the no such borrower error message here
+            if(e.getSQLState().equals(NO_ROW_SQL_STATE))
+                throw new ErrorMessage("No such borrower");
+            else if(e.getErrorCode() == INVALID_FOREIGN_KEY_ERROR)
                 throw new ErrorMessage("No such book");
             else if (e.getErrorCode() == DUPLICATE_KEY_SQL_ERROR)
                 throw new ErrorMessage("Book already checkout");
@@ -233,6 +237,9 @@ public class Database
     public void returnBook(String callNumber, short copyNumber) throws ErrorMessage
     {
         try {
+            
+            // no error message threw if only execute delete operation
+            // so added a select before delete
             #sql { select call_number, copy_number
                     into :callNumber, :copyNumber
                     from Checked_out
@@ -268,7 +275,7 @@ public class Database
     {
         int daysLate = 0;
         try {
-                
+            // calculate days late no matter if the book is overdue or not
             #sql { select days(today) - days(date_due)
                     into :daysLate
                     from Checked_out
